@@ -1,0 +1,32 @@
+archetypes:
+  growth:
+    weights:
+      growth: 0.55
+      retention: 0.15
+      revenue: 0.20
+      efficiency: 0.10
+    primary_kpi: "dau"
+  retention:
+    weights:
+      growth: 0.10
+      retention: 0.60
+      revenue: 0.15
+      efficiency: 0.15
+    primary_kpi: "d30_retention"
+  revenue:
+    weights:
+      growth: 0.10
+      retention: 0.20
+      revenue: 0.55
+      efficiency: 0.15
+    primary_kpi: "mrr"
+  efficiency:
+    weights:
+      growth: 0.10
+      retention: 0.15
+      revenue: 0.15
+      efficiency: 0.60
+    primary_kpi: "ops_margin"
+alpha_choices: [0.5, 1.0, 2.0]
+shift_probability: 0.6
+shift_steps: [3, 4, 5]
