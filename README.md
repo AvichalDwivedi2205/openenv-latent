@@ -235,12 +235,14 @@ Recommended env vars:
 API_BASE_URL=https://inference.do-ai.run/v1
 MODEL_NAME=openai-gpt-oss-20b
 HF_TOKEN=...
+LOCAL_IMAGE_NAME=
 WANDB_API_KEY=...
 ```
 
 Notes:
 
 - `HF_TOKEN` is the required submission variable name for the baseline script. If you are using DigitalOcean Gradient, point `API_BASE_URL` at the Gradient endpoint and provide that token through `HF_TOKEN`.
+- `LOCAL_IMAGE_NAME` is optional and only needed if you adapt the runner to a `from_docker_image()` workflow.
 - `DIGITALOCEAN_API_TOKEN` and `OPENAI_BASE_URL` are still accepted as backward-compatible fallbacks for local runs.
 - `WANDB_API_KEY` is optional unless you wire W&B logging into your runs.
 
@@ -305,7 +307,7 @@ uv run python -m openenv.cli validate .
 
 ### Submission baseline
 
-This is the required hackathon entrypoint. It uses the OpenAI Python client against an OpenAI-compatible endpoint and defaults to the 3 core submission tasks.
+This is the required hackathon entrypoint. It uses the OpenAI Python client against an OpenAI-compatible endpoint, defaults to the 3 core submission tasks, and emits only strict `[START]`, `[STEP]`, and `[END]` stdout lines for validator compatibility.
 
 ```bash
 export API_BASE_URL=https://inference.do-ai.run/v1
@@ -313,6 +315,13 @@ export MODEL_NAME=openai-gpt-oss-20b
 export HF_TOKEN=...
 uv run python inference.py
 ```
+
+The default submission runner:
+
+- uses one OpenAI-client call per task for submission compliance
+- takes deterministic environment actions from the visible-context heuristic policy
+- writes a machine-readable summary to `outputs/submission-baseline/summary.json`
+- keeps stdout restricted to the required structured log lines only
 
 Optional local Gradient compatibility:
 
@@ -505,15 +514,17 @@ These are sanity checks, not paper numbers. The exact scores move with seeds, bu
 
 ### Verified Submission Smoke Baseline
 
-A local model-backed smoke run of the required [`inference.py`](/Users/avichaldwivedi/dev/latent-neurips/inference.py) path now lives in [`outputs/submission-final-smoke-v2/summary.json`](/Users/avichaldwivedi/dev/latent-neurips/outputs/submission-final-smoke-v2/summary.json).
+A fresh local smoke run of the required [`inference.py`](/Users/avichaldwivedi/dev/latent-neurips/inference.py) path now lives in [`outputs/submission-structured-2026-04-08/summary.json`](/Users/avichaldwivedi/dev/latent-neurips/outputs/submission-structured-2026-04-08/summary.json).
+
+A back-to-back rerun produced the same mean scores in [`outputs/submission-structured-2026-04-08-rerun/summary.json`](/Users/avichaldwivedi/dev/latent-neurips/outputs/submission-structured-2026-04-08-rerun/summary.json), which is the current reproducibility check for the submission baseline.
 
 Mean scores for `openai-gpt-oss-20b` with `seeds=100:1` on the 3 core submission tasks:
 
 - `task1_feedback_triage`: `0.8513`
 - `task2_roadmap_priority`: `0.4885`
-- `task3_startup_week`: `0.6662`
+- `task3_startup_week`: `0.7026`
 
-This smoke run completed in about 40 seconds locally and triggered two parse fallbacks across the 3-task sweep, which are already recorded in the summary artifact.
+This smoke run completed in about 10 seconds locally for the three-task pass, and the repeated run reproduced the same scores exactly because the action policy is deterministic.
 
 ## Outputs
 
