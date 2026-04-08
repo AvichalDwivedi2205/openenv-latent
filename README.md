@@ -313,12 +313,13 @@ This is the required hackathon entrypoint. It uses the OpenAI Python client agai
 export API_BASE_URL=https://inference.do-ai.run/v1
 export MODEL_NAME=openai-gpt-oss-20b
 export HF_TOKEN=...
-uv run python inference.py
+python3 inference.py
 ```
 
 The default submission runner:
 
 - uses one OpenAI-client call per task for submission compliance
+- talks directly to the live HF Space API, so it does not rely on local package imports
 - takes deterministic environment actions from the visible-context heuristic policy
 - writes a machine-readable summary to `outputs/submission-baseline/summary.json`
 - keeps stdout restricted to the required structured log lines only
@@ -332,7 +333,7 @@ export API_BASE_URL="${API_BASE_URL:-https://inference.do-ai.run/v1}"
 export MODEL_NAME="${MODEL_NAME:-openai-gpt-oss-20b}"
 export HF_TOKEN="${HF_TOKEN:-$DIGITALOCEAN_API_TOKEN}"
 set +a
-uv run python inference.py --tasks task1_feedback_triage,task2_roadmap_priority,task3_startup_week
+python3 inference.py --tasks task1_feedback_triage,task2_roadmap_priority,task3_startup_week
 ```
 
 ### Heuristic baseline
@@ -514,17 +515,17 @@ These are sanity checks, not paper numbers. The exact scores move with seeds, bu
 
 ### Verified Submission Smoke Baseline
 
-A fresh local smoke run of the required [`inference.py`](/Users/avichaldwivedi/dev/latent-neurips/inference.py) path now lives in [`outputs/submission-structured-2026-04-08/summary.json`](/Users/avichaldwivedi/dev/latent-neurips/outputs/submission-structured-2026-04-08/summary.json).
+A fresh plain-Python smoke run of the required [`inference.py`](/Users/avichaldwivedi/dev/latent-neurips/inference.py) path now lives in [`outputs/submission-plain-python-test/summary.json`](/Users/avichaldwivedi/dev/latent-neurips/outputs/submission-plain-python-test/summary.json).
 
-A back-to-back rerun produced the same mean scores in [`outputs/submission-structured-2026-04-08-rerun/summary.json`](/Users/avichaldwivedi/dev/latent-neurips/outputs/submission-structured-2026-04-08-rerun/summary.json), which is the current reproducibility check for the submission baseline.
+A clean back-to-back rerun produced the same mean scores in [`outputs/submission-plain-python-test-clean-rerun/summary.json`](/Users/avichaldwivedi/dev/latent-neurips/outputs/submission-plain-python-test-clean-rerun/summary.json), which is the current reproducibility check for the submission baseline.
 
 Mean scores for `openai-gpt-oss-20b` with `seeds=100:1` on the 3 core submission tasks:
 
-- `task1_feedback_triage`: `0.8513`
+- `task1_feedback_triage`: `0.7513`
 - `task2_roadmap_priority`: `0.4885`
-- `task3_startup_week`: `0.7026`
+- `task3_startup_week`: `0.1470`
 
-This smoke run completed in about 10 seconds locally for the three-task pass, and the repeated run reproduced the same scores exactly because the action policy is deterministic.
+This smoke run completed in about 10 seconds locally for the three-task pass, and the repeated run reproduced the same scores exactly because the action policy is deterministic when the Space is not being reset concurrently.
 
 ## Outputs
 
@@ -587,7 +588,7 @@ uv run wandb login "$WANDB_API_KEY"
 
 ## Docker and Hugging Face Space
 
-This repo includes a root [`Dockerfile`](/Users/avichaldwivedi/dev/latent-neurips/Dockerfile) for Docker-based HF Spaces. Since Docker is not installed locally in this workspace, development is done via `uv run ...`, but the container target is still authored for submission.
+This repo includes a root [`Dockerfile`](/Users/avichaldwivedi/dev/latent-neurips/Dockerfile) for Docker-based HF Spaces. The container target has been built locally and is the same deployment path used by the live Hugging Face Space.
 
 Suggested HF runtime secrets / variables:
 
